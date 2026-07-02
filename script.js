@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Typing Animation Effect in Hero
     // -------------------------------------------------------------------------
     const typingTextElement = document.getElementById('typing-text');
-    const titles = ["Data Analyst", "Data Scientist (Aspiring)", "Python & SQL Developer", "Problem Solver"];
+    const titles = ["Fullstack Developer", "Data Analyst", "MERN Stack Specialist", "Data Science Enthusiast"];
     let titleIndex = 0;
     let charIndex = 0;
     let isDeleting = false;
