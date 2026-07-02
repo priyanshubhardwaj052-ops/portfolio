@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // -------------------------------------------------------------------------
-    // 7. Contact Form Submission Handling (Local Simulator)
+    // 7. Contact Form Submission Handling (Web3Forms API Integration)
     // -------------------------------------------------------------------------
     const contactForm = document.getElementById('contact-form');
     const formResponseMsg = document.getElementById('form-response-msg');
@@ -260,26 +260,49 @@ document.addEventListener('DOMContentLoaded', () => {
         contactForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
+            // Validate if access key is still default placeholder
+            const accessKeyInput = contactForm.querySelector('input[name="access_key"]');
+            if (accessKeyInput && accessKeyInput.value === 'YOUR_WEB3FORMS_ACCESS_KEY') {
+                formResponseMsg.className = 'form-response error';
+                formResponseMsg.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Please configure your Web3Forms Access Key in index.html first.`;
+                return;
+            }
+
             // Loading UI state
             formSubmitBtn.disabled = true;
             const originalBtnContent = formSubmitBtn.innerHTML;
             formSubmitBtn.innerHTML = `<span>Sending...</span> <i class="fa-solid fa-circle-notch fa-spin"></i>`;
             
-            // Mock api delay
-            setTimeout(() => {
-                formResponseMsg.className = 'form-response success';
-                formResponseMsg.innerHTML = `<i class="fa-regular fa-circle-check"></i> Thank you! Your message has been sent successfully.`;
-                
-                // Reset form
-                contactForm.reset();
+            const formData = new FormData(contactForm);
+            
+            fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(async (response) => {
+                let json = await response.json();
+                if (response.status == 200) {
+                    formResponseMsg.className = 'form-response success';
+                    formResponseMsg.innerHTML = `<i class="fa-regular fa-circle-check"></i> Thank you! Your message has been sent successfully.`;
+                    contactForm.reset();
+                } else {
+                    formResponseMsg.className = 'form-response error';
+                    formResponseMsg.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> ${json.message || "Something went wrong. Please try again."}`;
+                }
+            })
+            .catch(error => {
+                console.log(error);
+                formResponseMsg.className = 'form-response error';
+                formResponseMsg.innerHTML = `<i class="fa-solid fa-circle-xmark"></i> Network error. Please check your connection.`;
+            })
+            .finally(() => {
                 formSubmitBtn.disabled = false;
                 formSubmitBtn.innerHTML = originalBtnContent;
-                
-                // Clear message after 5 seconds
+                // Clear response message after 5 seconds
                 setTimeout(() => {
                     formResponseMsg.innerHTML = '';
                 }, 5000);
-            }, 1500);
+            });
         });
     }
 });
